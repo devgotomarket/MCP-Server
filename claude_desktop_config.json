@@ -1,0 +1,32 @@
+{
+    "mcpServers": {
+      "filesystem": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "C:/Users/Test/Desktop",
+          "CC:/Users/Test/Downloads"
+        ]
+      },
+      "github": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "XXXX"
+        }
+      },
+      "gmail_mcp_server": {
+        "command": "uv",
+        "args": [
+          "--directory",
+          "C:/Users/Test/Documents/github/mcp_server",
+          "run",
+          "server.py"
+        ]
+      }
+    }
+  }
