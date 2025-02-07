@@ -14,10 +14,16 @@ import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gmail_mcp_server")
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
+# Combined scopes for both Gmail and Calendar
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.modify',
+    'https://www.googleapis.com/auth/calendar'
+]
+
 mcp = FastMCP("gmail_mcp_server")
 
-def get_gmail_service():
+def get_credentials():
+    """Get and refresh Google API credentials"""
     creds = None
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
@@ -30,10 +36,21 @@ def get_gmail_service():
             creds = flow.run_local_server(port=0)
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
+    return creds
+
+def get_gmail_service():
+    """Get Gmail service using shared credentials"""
+    creds = get_credentials()
     return build('gmail', 'v1', credentials=creds)
+
+def get_calendar_service():
+    """Get Calendar service using shared credentials"""
+    creds = get_credentials()
+    return build('calendar', 'v3', credentials=creds)
 
 @mcp.tool()
 def send_email(to: str, subject: str, body: str) -> dict:
+    """Send an email using Gmail"""
     try:
         service = get_gmail_service()
         message = MIMEText(body)
@@ -49,15 +66,12 @@ def send_email(to: str, subject: str, body: str) -> dict:
         return {"result": f"Email sent successfully (Message ID: {result['id']})"}
         
     except Exception as e:
+        logger.error(f"Send email failed: {e}")
         return {"error": str(e)}
-    
-def get_calendar_service():
-    CALENDAR_SCOPES = ['https://www.googleapis.com/auth/calendar']
-    flow = InstalledAppFlow.from_client_secrets_file('credentials.json', CALENDAR_SCOPES)
-    creds = flow.run_local_server(port=0)
-    return build('calendar', 'v3', credentials=creds)
+
 @mcp.tool()
 def list_events(max_results: int = 3) -> dict:
+    """List upcoming calendar events"""
     try:
         calendar = get_calendar_service()
         now = datetime.datetime.utcnow().isoformat() + 'Z'
@@ -81,10 +95,12 @@ def list_events(max_results: int = 3) -> dict:
             
         return {"result": "\n".join(output)}
     except Exception as e:
+        logger.error(f"List events failed: {e}")
         return {"error": str(e)}
 
 @mcp.tool()
 def create_event(summary: str, start_time: str, end_time: str, description: str = "") -> dict:
+    """Create a new calendar event"""
     try:
         calendar = get_calendar_service()
         event = {
@@ -97,10 +113,12 @@ def create_event(summary: str, start_time: str, end_time: str, description: str 
         event = calendar.events().insert(calendarId='primary', body=event).execute()
         return {"result": f"Event created: {event.get('htmlLink')}"}
     except Exception as e:
+        logger.error(f"Create event failed: {e}")
         return {"error": str(e)}
 
 @mcp.tool()
 def search_emails(query: str, max_results: int = 10) -> dict:
+    """Search emails using a query string"""
     try:
         service = get_gmail_service()
         results = service.users().messages().list(
@@ -119,30 +137,33 @@ def search_emails(query: str, max_results: int = 10) -> dict:
             
         return {"result": "\n".join(messages) if messages else "No emails found"}
     except Exception as e:
+        logger.error(f"Search emails failed: {e}")
         return {"error": str(e)}
 
 @mcp.tool()
 def get_email_content(email_id: str) -> dict:
-   try:
-       service = get_gmail_service()
-       email = service.users().messages().get(userId='me', id=email_id).execute()
-       
-       headers = email['payload']['headers']
-       subject = next((h['value'] for h in headers if h['name'] == 'Subject'), 'No Subject')
-       sender = next((h['value'] for h in headers if h['name'] == 'From'), 'Unknown')
-       
-       if 'parts' in email['payload']:
-           content = email['payload']['parts'][0]['body'].get('data', '')
-       else:
-           content = email['payload']['body'].get('data', '')
-           
-       decoded_content = base64.urlsafe_b64decode(content).decode() if content else 'No content'
-       
-       return {
-           "result": f"From: {sender}\nSubject: {subject}\n\nContent:\n{decoded_content}"
-       }
-   except Exception as e:
-       return {"error": str(e)}
+    """Get the full content of a specific email"""
+    try:
+        service = get_gmail_service()
+        email = service.users().messages().get(userId='me', id=email_id).execute()
+        
+        headers = email['payload']['headers']
+        subject = next((h['value'] for h in headers if h['name'] == 'Subject'), 'No Subject')
+        sender = next((h['value'] for h in headers if h['name'] == 'From'), 'Unknown')
+        
+        if 'parts' in email['payload']:
+            content = email['payload']['parts'][0]['body'].get('data', '')
+        else:
+            content = email['payload']['body'].get('data', '')
+            
+        decoded_content = base64.urlsafe_b64decode(content).decode() if content else 'No content'
+        
+        return {
+            "result": f"From: {sender}\nSubject: {subject}\n\nContent:\n{decoded_content}"
+        }
+    except Exception as e:
+        logger.error(f"Get email content failed: {e}")
+        return {"error": str(e)}
 
 @mcp.resource("gmail://inbox") 
 def get_emails() -> str:
