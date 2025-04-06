@@ -1,0 +1,31 @@
+{
+    "name": "mcp-web-extractor",
+    "version": "0.1.0",
+    "description": "MCP server for extracting content from web pages",
+    "main": "dist/index.js",
+    "type": "module",
+    "bin": {
+      "mcp-web-extractor": "./dist/index.js"
+    },
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/index.js"
+    },
+    "keywords": [
+      "mcp",
+      "model-context-protocol",
+      "claude",
+      "web-extractor"
+    ],
+    "author": "Your Name",
+    "license": "MIT",
+    "dependencies": {
+      "@modelcontextprotocol/sdk": "^1.0.0",
+      "cheerio": "^1.0.0-rc.12",
+      "zod": "^3.21.4"
+    },
+    "devDependencies": {
+      "@types/node": "^18.15.11",
+      "typescript": "^5.0.4"
+    }
+  }
