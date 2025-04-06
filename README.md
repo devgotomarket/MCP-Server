@@ -49,6 +49,7 @@ Run step 5 and then add below entries in claude
     }
   }
 }
+```
 
 ### Publishing to npm
 
@@ -73,7 +74,7 @@ npm publish --access=public
 
 ## Using with Claude Desktop after publishing
 
-To use this MCP server with Claude Desktop, add this to your configuration file:
+After publishing, to use this MCP server with Claude Desktop, add this to your configuration file(claude_config.json):
 
 ```json
 {
@@ -111,7 +112,7 @@ Location of Claude Desktop configuration file:
 After updating the configuration, restart Claude Desktop.
 
 
-```
+
 
 ## License
 
