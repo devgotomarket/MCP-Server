@@ -1,0 +1,32 @@
+{
+  "name": "web-content-extractor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "dev": "tsx server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@mozilla/readability": "^0.6.0",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
+    "express": "^5.1.0",
+    "jsdom": "^26.0.0",
+    "puppeteer": "^24.6.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.14.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}
