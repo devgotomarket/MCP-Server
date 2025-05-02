@@ -13,12 +13,12 @@ const server = new McpServer({
   version: "1.0.0"
 });
 
-// 🛠️ Tool: extract-url using Readability + jsdom
+// Tool: extract-url using Readability + jsdom
 server.tool(
   "extract-url",
   { url: z.string().url() },
   async ({ url }) => {
-    console.log(`🔍 Extracting readable content from: ${url}`);
+    console.log(`Extracting readable content from: ${url}`);
     try {
       const response = await axios.get(url, {
         timeout: 10000,
